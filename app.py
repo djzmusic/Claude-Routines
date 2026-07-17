@@ -11,10 +11,12 @@ app = Flask(__name__)
 # Clients are initialized once at startup so OAuth only runs on first launch
 _gmail = None
 _outlook = None
+_calendar = None
+_tasks = None
 
 
 def _init_clients():
-    global _gmail, _outlook
+    global _gmail, _outlook, _calendar, _tasks
     errors = []
 
     gmail_creds = os.getenv("GMAIL_CREDENTIALS_FILE", "credentials_gmail.json")
@@ -38,6 +40,24 @@ def _init_clients():
             errors.append(f"Outlook: {e}")
     else:
         app.logger.warning("OUTLOOK_CLIENT_ID not set — Outlook skipped")
+
+    calendar_tasks_token = os.getenv("GOOGLE_CALENDAR_TASKS_TOKEN", "tokens/google_calendar_tasks_token.json")
+    if os.path.exists(calendar_tasks_token):
+        try:
+            from google_calendar_client import GoogleCalendarClient
+            _calendar = GoogleCalendarClient().authenticate()
+            app.logger.info("Google Calendar connected")
+        except Exception as e:
+            errors.append(f"Google Calendar: {e}")
+
+        try:
+            from google_tasks_client import GoogleTasksClient
+            _tasks = GoogleTasksClient().authenticate()
+            app.logger.info("Google Tasks connected")
+        except Exception as e:
+            errors.append(f"Google Tasks: {e}")
+    else:
+        app.logger.warning("Google Calendar/Tasks not authorized — briefing schedule/tasks sections skipped")
 
     if errors:
         for e in errors:
@@ -77,7 +97,38 @@ def status():
     return jsonify({
         "gmail": _gmail is not None,
         "outlook": _outlook is not None,
+        "calendar": _calendar is not None,
+        "tasks": _tasks is not None,
     })
+
+
+@app.route("/briefing")
+def briefing_page():
+    return render_template(
+        "briefing.html",
+        gmail_ready=_gmail is not None,
+        calendar_ready=_calendar is not None,
+        tasks_ready=_tasks is not None,
+    )
+
+
+@app.route("/api/briefing", methods=["POST"])
+def run_briefing():
+    from briefing import MorningBriefing
+
+    if not _gmail and not _calendar and not _tasks:
+        return jsonify({
+            "success": False,
+            "error": "No accounts connected. See README.md to set up Gmail and Google Calendar/Tasks.",
+        }), 400
+
+    try:
+        agent = MorningBriefing(gmail_client=_gmail, calendar_client=_calendar, tasks_client=_tasks)
+        result = agent.generate()
+        return jsonify({"success": True, "briefing": result})
+    except Exception as e:
+        app.logger.exception("Briefing generation failed")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 if __name__ == "__main__":

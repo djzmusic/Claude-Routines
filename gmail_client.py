@@ -70,6 +70,35 @@ class GmailClient:
 
         return results
 
+    def get_unread_messages(self, max_results=50):
+        query = "is:unread -in:trash -in:spam"
+
+        results = []
+        page_token = None
+
+        while len(results) < max_results:
+            kwargs = {
+                "userId": "me",
+                "q": query,
+                "maxResults": min(100, max_results - len(results)),
+            }
+            if page_token:
+                kwargs["pageToken"] = page_token
+            response = self.service.users().messages().list(**kwargs).execute()
+
+            msg_ids = [m["id"] for m in response.get("messages", [])]
+            for msg_id in msg_ids:
+                msg = self.service.users().messages().get(
+                    userId="me", id=msg_id, format="full"
+                ).execute()
+                results.append(self._parse_message(msg))
+
+            page_token = response.get("nextPageToken")
+            if not page_token:
+                break
+
+        return results
+
     def _parse_message(self, msg):
         headers = {h["name"]: h["value"] for h in msg["payload"].get("headers", [])}
         body = self._extract_body(msg["payload"])

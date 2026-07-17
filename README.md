@@ -2,6 +2,8 @@
 
 One button that scans the last 24 hours of email across Gmail and Office 365, trashes junk and anything with an unsubscribe link, and ranks your business emails by priority.
 
+It also includes a **Morning Briefing** page (`/briefing`) that pulls together your upcoming Google Calendar events, unread Gmail triaged by urgency, Google Tasks, and AI-surfaced action items — plus the same junk cleanup, run on demand.
+
 ## What It Does
 
 | Action | How it decides |
@@ -14,6 +16,18 @@ One button that scans the last 24 hours of email across Gmail and Office 365, tr
 
 Gmail gets labeled (`Priority/High`, `Priority/Medium`, `Priority/Low`, `Category/Finance`, etc.).  
 Outlook gets importance flags and categories.
+
+### Morning Briefing (`/briefing`)
+
+| Section | Source | Notes |
+|---------|--------|-------|
+| Schedule | Google Calendar | Flags events whose title/description implies prep is needed |
+| Important Emails | Gmail unread | AI-triaged into Urgent / Important / FYI |
+| Google Tasks | Google Tasks | Grouped into Overdue / Due Today-This Week / Upcoming |
+| Action Items | Calendar + unread email | AI-surfaced follow-ups that aren't formally logged yet |
+| Junk Email Cleanup | Gmail | Header-confirmed junk (`List-Unsubscribe`, `Precedence: bulk`) is auto-trashed; anything the AI only *suspects* is junk is flagged for your review, not deleted |
+
+There's no connected messaging platform in this app yet, so "Messages Requiring Response" isn't included — that section only makes sense once a Slack/Teams-style client is wired up.
 
 ---
 
@@ -80,7 +94,18 @@ Open `.env` and fill in your keys (see steps below for where to get them).
 
 ---
 
-### Step 6 — Run the app
+### Step 6 — Connect Google Calendar & Tasks (for the Morning Briefing)
+
+1. On the same Google Cloud project as Step 4, go to **APIs & Services → Library** and enable the **Google Calendar API** and **Google Tasks API**
+2. Run the setup script:
+   ```bash
+   python setup_google_calendar_tasks.py
+   ```
+   A browser window will open — sign in and click Allow.
+
+---
+
+### Step 7 — Run the app
 
 ```bash
 python app.py
@@ -88,7 +113,7 @@ python app.py
 
 Then open your browser to: **http://localhost:5001**
 
-Click the big **Clean My Inbox** button. Done.
+Click the big **Clean My Inbox** button, or go to **http://localhost:5001/briefing** for the Morning Briefing. Done.
 
 ---
 
@@ -105,15 +130,20 @@ DRY_RUN=true            # Test mode — shows what would happen without moving a
 
 ```
 Claude-Routines/
-├── app.py               # Web server (Flask)
-├── email_processor.py   # Core logic + Claude AI classification
-├── gmail_client.py      # Gmail API wrapper
-├── outlook_client.py    # Microsoft Graph API wrapper
-├── setup_gmail.py       # One-time Gmail authorization
-├── setup_outlook.py     # One-time Outlook authorization
+├── app.py                          # Web server (Flask)
+├── email_processor.py              # Cleanup/priority logic + Claude AI classification
+├── briefing.py                     # Morning Briefing aggregation + Claude AI triage
+├── gmail_client.py                 # Gmail API wrapper
+├── outlook_client.py               # Microsoft Graph API wrapper
+├── google_calendar_client.py       # Google Calendar API wrapper
+├── google_tasks_client.py          # Google Tasks API wrapper
+├── setup_gmail.py                  # One-time Gmail authorization
+├── setup_outlook.py                # One-time Outlook authorization
+├── setup_google_calendar_tasks.py  # One-time Calendar/Tasks authorization
 ├── templates/
-│   └── index.html       # The button UI
-├── .env                 # Your secrets (never committed)
-├── tokens/              # OAuth tokens (never committed)
+│   ├── index.html                  # The cleanup button UI
+│   └── briefing.html               # The Morning Briefing UI
+├── .env                            # Your secrets (never committed)
+├── tokens/                         # OAuth tokens (never committed)
 └── requirements.txt
 ```

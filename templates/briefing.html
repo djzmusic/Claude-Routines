@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning Briefing</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 1.5rem;
+    }
+
+    a { color: #58a6ff; }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.4rem;
+      background: linear-gradient(135deg, #58a6ff, #a371f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle { text-align: center; color: #8b949e; font-size: 0.95rem; margin-bottom: 2rem; }
+
+    .accounts { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem; border-radius: 999px; font-size: 0.85rem; font-weight: 500; border: 1px solid transparent; }
+    .pill.connected { background: #0d2a1d; border-color: #238636; color: #3fb950; }
+    .pill.disconnected { background: #1f1616; border-color: #6e2020; color: #f85149; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .pill.connected .dot { background: #3fb950; }
+    .pill.disconnected .dot { background: #f85149; }
+
+    #runBtn {
+      display: block; width: 100%; padding: 1rem 2rem; font-size: 1.15rem; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg, #1f6feb, #388bfd); border: none;
+      border-radius: 10px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.02em;
+    }
+    #runBtn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    #runBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #status { text-align: center; margin-top: 1.25rem; font-size: 0.9rem; color: #8b949e; min-height: 1.4em; }
+    #status.error { color: #f85149; }
+
+    #results { display: none; }
+
+    .brief-header { text-align: center; margin-bottom: 1rem; }
+    .brief-header .subject { font-size: 1.4rem; font-weight: 700; color: #e6edf3; }
+    .brief-header .date { color: #8b949e; font-size: 0.95rem; margin-top: 0.2rem; }
+
+    h2 { font-size: 1rem; font-weight: 600; color: #e6edf3; margin-bottom: 0.75rem; margin-top: 1.5rem; }
+    h3 { font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; margin: 1rem 0 0.5rem; }
+
+    ul.list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    ul.list li {
+      background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+      padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem;
+    }
+    .item-title { font-size: 0.9rem; color: #e6edf3; font-weight: 500; }
+    .item-meta { font-size: 0.78rem; color: #8b949e; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem;
+      font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-right: 0.3rem;
+    }
+    .badge.urgent, .badge.overdue { background: #2d0f0f; color: #f85149; border: 1px solid #6e2020; }
+    .badge.important, .badge.due_soon { background: #271e00; color: #d29922; border: 1px solid #4d3800; }
+    .badge.fyi, .badge.upcoming { background: #0d2a1d; color: #3fb950; border: 1px solid #1a4d2e; }
+    .badge.prep { background: #1c1c3b; color: #79c0ff; border: 1px solid #2d3e6b; }
+
+    .error-box { background: #1f1616; border: 1px solid #6e2020; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.85rem; color: #f85149; }
+    .dry-run-notice { background: #271e00; border: 1px solid #4d3800; border-radius: 8px; padding: 0.6rem 1rem; font-size: 0.82rem; color: #d29922; margin-bottom: 1rem; }
+    hr { border: none; border-top: 1px solid #30363d; margin: 1.25rem 0; }
+    .empty-note { color: #8b949e; font-size: 0.88rem; font-style: italic; }
+    .stat-row { display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.85rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Morning Briefing</h1>
+  <p class="subtitle">Pulls your live schedule, inbox, and tasks into one catch-up.</p>
+  <p style="text-align:center;margin-bottom:1.5rem;"><a href="/" style="font-size:0.9rem;">&larr; Email Cleanup</a></p>
+
+  <div class="accounts">
+    {% if gmail_ready %}<span class="pill connected"><span class="dot"></span>Gmail Connected</span>
+    {% else %}<span class="pill disconnected"><span class="dot"></span>Gmail Not Set Up</span>{% endif %}
+    {% if calendar_ready %}<span class="pill connected"><span class="dot"></span>Calendar Connected</span>
+    {% else %}<span class="pill disconnected"><span class="dot"></span>Calendar Not Set Up</span>{% endif %}
+    {% if tasks_ready %}<span class="pill connected"><span class="dot"></span>Tasks Connected</span>
+    {% else %}<span class="pill disconnected"><span class="dot"></span>Tasks Not Set Up</span>{% endif %}
+  </div>
+
+  <button id="runBtn" onclick="runBriefing()">Generate Briefing</button>
+  <div class="spinner" id="spinner"></div>
+  <div id="status"></div>
+</div>
+
+<div class="card" id="results">
+  <div class="brief-header">
+    <div class="subject">Good Morning, Boss</div>
+    <div class="date" id="briefDate"></div>
+  </div>
+
+  <div id="scheduleSection" style="display:none">
+    <h2>Schedule</h2>
+    <ul class="list" id="scheduleList"></ul>
+  </div>
+
+  <div id="emailsSection" style="display:none">
+    <h2>Important Emails</h2>
+    <div id="emailTiers"></div>
+  </div>
+
+  <div id="messagesSection" style="display:none">
+    <h2>Messages Requiring Response</h2>
+    <ul class="list" id="messagesList"></ul>
+  </div>
+
+  <div id="tasksSection" style="display:none">
+    <h2>Google Tasks</h2>
+    <div id="taskGroups"></div>
+  </div>
+
+  <div id="actionItemsSection" style="display:none">
+    <h2>Action Items</h2>
+    <ul class="list" id="actionItemsList"></ul>
+  </div>
+
+  <div id="junkSection" style="display:none">
+    <h2>Junk Email Cleanup</h2>
+    <div id="junkDryRunNotice" class="dry-run-notice" style="display:none">
+      DRY RUN MODE &mdash; nothing was actually trashed. Set DRY_RUN=false in .env to apply changes.
+    </div>
+    <div class="stat-row">
+      <span id="junkTrashedCount">0 trashed</span>
+      <span id="junkFlaggedCount">0 flagged for review</span>
+    </div>
+    <h3>Flagged for Your Review</h3>
+    <ul class="list" id="junkFlaggedList"></ul>
+  </div>
+
+  <div id="errorSection" style="display:none">
+    <hr />
+    <h2>Errors</h2>
+    <div id="errorList"></div>
+  </div>
+</div>
+
+<script>
+async function runBriefing() {
+  const btn = document.getElementById("runBtn");
+  const spinner = document.getElementById("spinner");
+  const statusEl = document.getElementById("status");
+  const resultsEl = document.getElementById("results");
+
+  btn.disabled = true;
+  spinner.style.display = "block";
+  statusEl.textContent = "Pulling your day together…";
+  statusEl.className = "";
+  resultsEl.style.display = "none";
+
+  try {
+    const resp = await fetch("/api/briefing", { method: "POST" });
+    const data = await resp.json();
+
+    if (!data.success) {
+      statusEl.textContent = "Error: " + (data.error || "Unknown error");
+      statusEl.className = "error";
+      return;
+    }
+
+    renderBriefing(data.briefing);
+    statusEl.textContent = "Done!";
+  } catch (err) {
+    statusEl.textContent = "Network error: " + err.message;
+    statusEl.className = "error";
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = "none";
+  }
+}
+
+function renderBriefing(b) {
+  document.getElementById("results").style.display = "block";
+  document.getElementById("briefDate").textContent = b.date || "";
+
+  renderSchedule(b.schedule || []);
+  renderEmails(b.emails || {});
+  renderTasks(b.tasks || {});
+  renderActionItems(b.action_items || []);
+  renderJunk(b.junk_cleanup || {});
+  renderErrors(b.errors || []);
+
+  // Messages requiring response has no connected data source in this app yet.
+  document.getElementById("messagesSection").style.display = "none";
+}
+
+function renderSchedule(events) {
+  const section = document.getElementById("scheduleSection");
+  const list = document.getElementById("scheduleList");
+  list.innerHTML = "";
+
+  if (!events.length) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
+  events.forEach(e => {
+    const li = document.createElement("li");
+    const time = formatEventTime(e.start, e.end);
+    const attendees = (e.attendees || []).join(", ");
+    li.innerHTML = `
+      <div>${e.prep_needed ? '<span class="badge prep">Prep Needed</span>' : ""}</div>
+      <div class="item-title">${esc(time)} &mdash; ${esc(e.title)}</div>
+      <div class="item-meta">${e.location ? "Location: " + esc(e.location) + " &mdash; " : ""}${attendees ? "With: " + esc(attendees) : "No attendees listed"}</div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function renderEmails(emails) {
+  const section = document.getElementById("emailsSection");
+  const container = document.getElementById("emailTiers");
+  container.innerHTML = "";
+
+  const tiers = [
+    ["urgent", "Urgent"],
+    ["important", "Important"],
+    ["fyi", "FYI"],
+  ];
+
+  const anyEmails = tiers.some(([key]) => (emails[key] || []).length > 0);
+  if (!anyEmails) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
+  tiers.forEach(([key, label]) => {
+    const items = emails[key] || [];
+    if (!items.length) return;
+    const h3 = document.createElement("h3");
+    h3.textContent = label;
+    container.appendChild(h3);
+    const ul = document.createElement("ul");
+    ul.className = "list";
+    items.forEach(e => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div><span class="badge ${key}">${label}</span></div>
+        <div class="item-title">${esc(e.subject)}</div>
+        <div class="item-meta">From: ${esc(e.from)}${e.summary ? " &mdash; " + esc(e.summary) : ""}</div>
+      `;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  });
+}
+
+function renderTasks(tasks) {
+  const section = document.getElementById("tasksSection");
+  const container = document.getElementById("taskGroups");
+  container.innerHTML = "";
+
+  const groups = [
+    ["overdue", "Overdue"],
+    ["due_soon", "Due Today / This Week"],
+    ["upcoming", "Upcoming"],
+  ];
+
+  const anyTasks = groups.some(([key]) => (tasks[key] || []).length > 0);
+  if (!anyTasks) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
+  groups.forEach(([key, label]) => {
+    const items = tasks[key] || [];
+    if (!items.length) return;
+    const h3 = document.createElement("h3");
+    h3.textContent = label;
+    container.appendChild(h3);
+    const ul = document.createElement("ul");
+    ul.className = "list";
+    items.forEach(t => {
+      const li = document.createElement("li");
+      const due = t.due ? new Date(t.due).toLocaleDateString() : "";
+      li.innerHTML = `
+        <div><span class="badge ${key}">${label}</span></div>
+        <div class="item-title">${esc(t.title)}</div>
+        <div class="item-meta">${esc(t.list)}${due ? " &mdash; Due " + esc(due) : ""}${t.notes ? " &mdash; " + esc(t.notes) : ""}</div>
+      `;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  });
+}
+
+function renderActionItems(items) {
+  const section = document.getElementById("actionItemsSection");
+  const list = document.getElementById("actionItemsList");
+  list.innerHTML = "";
+
+  if (!items.length) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
+  items.forEach(text => {
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="item-title">${esc(text)}</div>`;
+    list.appendChild(li);
+  });
+}
+
+function renderJunk(junk) {
+  const section = document.getElementById("junkSection");
+  const trashed = junk.trashed || [];
+  const flagged = junk.flagged || [];
+
+  if (!trashed.length && !flagged.length) { section.style.display = "none"; return; }
+  section.style.display = "block";
+
+  document.getElementById("junkDryRunNotice").style.display = junk.dry_run ? "block" : "none";
+  document.getElementById("junkTrashedCount").textContent = `${trashed.length} trashed`;
+  document.getElementById("junkFlaggedCount").textContent = `${flagged.length} flagged for review`;
+
+  const flagList = document.getElementById("junkFlaggedList");
+  flagList.innerHTML = "";
+  if (!flagged.length) {
+    flagList.innerHTML = '<li><span class="empty-note">Nothing borderline &mdash; all clear.</span></li>';
+  } else {
+    flagged.forEach(e => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="item-title">${esc(e.subject)}</div>
+        <div class="item-meta">From: ${esc(e.from)} &mdash; ${esc(e.reason)}</div>
+      `;
+      flagList.appendChild(li);
+    });
+  }
+}
+
+function renderErrors(errors) {
+  const section = document.getElementById("errorSection");
+  const list = document.getElementById("errorList");
+  if (!errors.length) { section.style.display = "none"; return; }
+  section.style.display = "block";
+  list.innerHTML = errors.map(e => `<div class="error-box">${esc(e)}</div>`).join("");
+}
+
+function formatEventTime(start, end) {
+  if (!start) return "";
+  const startDate = new Date(start);
+  const isAllDay = /^\d{4}-\d{2}-\d{2}$/.test(start);
+  if (isAllDay) return "All day";
+  const opts = { hour: "numeric", minute: "2-digit" };
+  const startStr = startDate.toLocaleTimeString([], opts);
+  if (!end) return startStr;
+  const endStr = new Date(end).toLocaleTimeString([], opts);
+  return `${startStr} – ${endStr}`;
+}
+
+function esc(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+</script>
+</body>
+</html>
