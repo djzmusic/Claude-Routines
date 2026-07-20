@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning Briefing</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 760px;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.4rem;
+      background: linear-gradient(135deg, #58a6ff, #a371f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle { text-align: center; color: #8b949e; font-size: 0.95rem; margin-bottom: 1.5rem; }
+
+    .accounts { display: flex; gap: 0.75rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+    .pill { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.9rem; border-radius: 999px; font-size: 0.85rem; font-weight: 500; border: 1px solid transparent; }
+    .pill.connected { background: #0d2a1d; border-color: #238636; color: #3fb950; }
+    .pill.disconnected { background: #1f1616; border-color: #6e2020; color: #f85149; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .pill.connected .dot { background: #3fb950; }
+    .pill.disconnected .dot { background: #f85149; }
+
+    #runBtn {
+      display: block; width: 100%; padding: 1rem 2rem; font-size: 1.15rem; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg, #1f6feb, #388bfd); border: none;
+      border-radius: 10px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.02em;
+    }
+    #runBtn:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+    #runBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+      display: none; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #status { text-align: center; margin-top: 1.25rem; font-size: 0.9rem; color: #8b949e; min-height: 1.4em; }
+    #status.error { color: #f85149; }
+
+    #briefing { display: none; }
+
+    .brief-header { text-align: center; margin-bottom: 0.5rem; }
+    .brief-header .subject { font-size: 1.6rem; font-weight: 700; color: #e6edf3; }
+    .brief-header .date { color: #8b949e; font-size: 0.95rem; margin-top: 0.25rem; }
+
+    section { margin-top: 1.75rem; }
+    section h2 { font-size: 1rem; font-weight: 600; color: #e6edf3; margin-bottom: 0.75rem; }
+    section h3 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #8b949e; margin: 0.9rem 0 0.5rem; }
+
+    ul.item-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    ul.item-list li {
+      background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+      padding: 0.7rem 1rem; display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.9rem;
+    }
+    .item-title { color: #e6edf3; font-weight: 500; }
+    .item-meta { font-size: 0.78rem; color: #8b949e; }
+
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem;
+      font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-right: 0.3rem;
+    }
+    .badge.urgent, .badge.overdue { background: #2d0f0f; color: #f85149; border: 1px solid #6e2020; }
+    .badge.important, .badge.due_this_week { background: #271e00; color: #d29922; border: 1px solid #4d3800; }
+    .badge.fyi, .badge.upcoming { background: #0d2a1d; color: #3fb950; border: 1px solid #1a4d2e; }
+    .badge.prep { background: #1c1c3b; color: #79c0ff; border: 1px solid #2d3e6b; }
+    .badge.flagged { background: #271e00; color: #d29922; border: 1px solid #4d3800; }
+    .badge.removed { background: #2d0f0f; color: #f85149; border: 1px solid #6e2020; }
+
+    hr { border: none; border-top: 1px solid #30363d; margin: 1.5rem 0 0; }
+    .empty-note { color: #8b949e; font-size: 0.88rem; font-style: italic; }
+    .dry-run-notice {
+      background: #271e00; border: 1px solid #4d3800; border-radius: 8px;
+      padding: 0.6rem 1rem; font-size: 0.82rem; color: #d29922; margin-top: 1rem;
+    }
+    .error-box {
+      background: #1f1616; border: 1px solid #6e2020; border-radius: 8px;
+      padding: 0.75rem 1rem; font-size: 0.85rem; color: #f85149; margin-top: 0.5rem;
+    }
+    .back-link { text-align: center; font-size: 0.85rem; margin-top: 1rem; }
+    .back-link a { color: #58a6ff; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Morning Briefing</h1>
+  <p class="subtitle">Live pull from your calendar, inbox, and tasks.</p>
+
+  <div class="accounts">
+    {% if gmail_ready %}
+      <span class="pill connected"><span class="dot"></span>Gmail Connected</span>
+    {% else %}
+      <span class="pill disconnected"><span class="dot"></span>Gmail Not Set Up</span>
+    {% endif %}
+    {% if calendar_ready %}
+      <span class="pill connected"><span class="dot"></span>Calendar Connected</span>
+    {% else %}
+      <span class="pill disconnected"><span class="dot"></span>Calendar Not Set Up</span>
+    {% endif %}
+    {% if tasks_ready %}
+      <span class="pill connected"><span class="dot"></span>Tasks Connected</span>
+    {% else %}
+      <span class="pill disconnected"><span class="dot"></span>Tasks Not Set Up</span>
+    {% endif %}
+  </div>
+
+  <button id="runBtn" onclick="runBriefing()">Generate Briefing</button>
+  <div class="spinner" id="spinner"></div>
+  <div id="status"></div>
+  <p class="back-link"><a href="/">&larr; Back to Email Cleanup</a></p>
+</div>
+
+<div class="card" id="briefing">
+  <div class="brief-header">
+    <div class="subject">Good Morning, Boss</div>
+    <div class="date" id="briefDate"></div>
+  </div>
+
+  <section id="sec-schedule" style="display:none">
+    <hr /><h2>Schedule</h2>
+    <ul class="item-list" id="scheduleList"></ul>
+  </section>
+
+  <section id="sec-emails" style="display:none">
+    <hr /><h2>Important Emails</h2>
+    <div id="emailTiers"></div>
+  </section>
+
+  <section id="sec-messages" style="display:none">
+    <hr /><h2>Messages Requiring Response</h2>
+    <ul class="item-list" id="messagesList"></ul>
+  </section>
+
+  <section id="sec-tasks" style="display:none">
+    <hr /><h2>Google Tasks</h2>
+    <div id="taskGroups"></div>
+  </section>
+
+  <section id="sec-actions" style="display:none">
+    <hr /><h2>Action Items</h2>
+    <ul class="item-list" id="actionList"></ul>
+  </section>
+
+  <section id="sec-junk" style="display:none">
+    <hr /><h2>Junk Email Cleanup</h2>
+    <div id="junkDryRun" class="dry-run-notice" style="display:none">
+      DRY RUN MODE — nothing was actually trashed. Set DRY_RUN=false in .env to apply changes.
+    </div>
+    <p class="item-meta" id="junkSummary" style="margin-bottom:0.6rem"></p>
+    <div id="junkFlaggedWrap" style="display:none">
+      <h3>Flagged for Your Review</h3>
+      <ul class="item-list" id="junkFlaggedList"></ul>
+    </div>
+    <div id="junkRemovedWrap" style="display:none">
+      <h3>Removed</h3>
+      <ul class="item-list" id="junkRemovedList"></ul>
+    </div>
+  </section>
+
+  <div id="errorSection" style="display:none">
+    <hr />
+    <h2 style="margin-top:0.9rem">Errors</h2>
+    <div id="errorList"></div>
+  </div>
+</div>
+
+<script>
+async function runBriefing() {
+  const btn = document.getElementById("runBtn");
+  const spinner = document.getElementById("spinner");
+  const statusEl = document.getElementById("status");
+  const briefingEl = document.getElementById("briefing");
+
+  btn.disabled = true;
+  spinner.style.display = "block";
+  statusEl.textContent = "Pulling your schedule, inbox, and tasks…";
+  statusEl.className = "";
+  briefingEl.style.display = "none";
+
+  try {
+    const resp = await fetch("/api/briefing", { method: "POST" });
+    const data = await resp.json();
+
+    if (!data.success) {
+      statusEl.textContent = "Error: " + (data.error || "Unknown error");
+      statusEl.className = "error";
+      return;
+    }
+
+    render(data.results);
+    statusEl.textContent = "Done!";
+  } catch (err) {
+    statusEl.textContent = "Network error: " + err.message;
+    statusEl.className = "error";
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = "none";
+  }
+}
+
+function render(r) {
+  document.getElementById("briefing").style.display = "block";
+  document.getElementById("briefDate").textContent = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+
+  renderSchedule(r.schedule || []);
+  renderEmails(r.emails || {});
+  renderMessages(r.messages_awaiting_reply || []);
+  renderTasks(r.tasks || {});
+  renderActionItems(r.action_items || []);
+  renderJunk(r.junk_cleanup || {});
+  renderErrors(r.errors || []);
+}
+
+function toggle(id, show) {
+  document.getElementById(id).style.display = show ? "block" : "none";
+}
+
+function renderSchedule(events) {
+  toggle("sec-schedule", events.length > 0);
+  if (!events.length) return;
+  const list = document.getElementById("scheduleList");
+  list.innerHTML = "";
+  events.forEach(e => {
+    const li = document.createElement("li");
+    const time = formatTimeRange(e.start, e.end);
+    const attendees = (e.attendees || []).join(", ");
+    li.innerHTML = `
+      <div class="item-title">${e.prep_needed ? '<span class="badge prep">Prep</span>' : ""}${esc(e.title)}</div>
+      <div class="item-meta">${esc(time)}${e.location ? " &mdash; " + esc(e.location) : ""}</div>
+      ${attendees ? `<div class="item-meta">With: ${esc(attendees)}</div>` : ""}
+      ${e.prep_needed ? `<div class="item-meta">${esc(e.prep_needed)}</div>` : ""}
+    `;
+    list.appendChild(li);
+  });
+}
+
+function renderEmails(tiers) {
+  const order = [["urgent", "Urgent"], ["important", "Important"], ["fyi", "FYI"]];
+  const any = order.some(([key]) => (tiers[key] || []).length > 0);
+  toggle("sec-emails", any);
+  if (!any) return;
+
+  const wrap = document.getElementById("emailTiers");
+  wrap.innerHTML = "";
+  order.forEach(([key, label]) => {
+    const items = tiers[key] || [];
+    if (!items.length) return;
+    const h3 = document.createElement("h3");
+    h3.textContent = label;
+    wrap.appendChild(h3);
+    const ul = document.createElement("ul");
+    ul.className = "item-list";
+    items.forEach(e => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="item-title"><span class="badge ${key}">${label}</span>${esc(e.subject)}</div>
+        <div class="item-meta">From: ${esc(e.from)}${e.summary ? " &mdash; " + esc(e.summary) : ""}</div>
+      `;
+      ul.appendChild(li);
+    });
+    wrap.appendChild(ul);
+  });
+}
+
+function renderMessages(messages) {
+  toggle("sec-messages", messages.length > 0);
+  if (!messages.length) return;
+  const list = document.getElementById("messagesList");
+  list.innerHTML = "";
+  messages.forEach(m => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="item-title">${esc(m.from || m.sender || "")}</div>
+      <div class="item-meta">${esc(m.preview || m.text || "")}</div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+function renderTasks(groups) {
+  const order = [["overdue", "Overdue"], ["due_this_week", "Due Today / This Week"], ["upcoming", "Upcoming"]];
+  const any = order.some(([key]) => (groups[key] || []).length > 0);
+  toggle("sec-tasks", any);
+  if (!any) return;
+
+  const wrap = document.getElementById("taskGroups");
+  wrap.innerHTML = "";
+  order.forEach(([key, label]) => {
+    const items = groups[key] || [];
+    if (!items.length) return;
+    const h3 = document.createElement("h3");
+    h3.textContent = label;
+    wrap.appendChild(h3);
+    const ul = document.createElement("ul");
+    ul.className = "item-list";
+    items.forEach(t => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="item-title"><span class="badge ${key}">${label}</span>${esc(t.title)}</div>
+        <div class="item-meta">${esc(t.list || "")}${t.due ? " &mdash; due " + esc(formatDate(t.due)) : ""}</div>
+      `;
+      ul.appendChild(li);
+    });
+    wrap.appendChild(ul);
+  });
+}
+
+function renderActionItems(items) {
+  toggle("sec-actions", items.length > 0);
+  if (!items.length) return;
+  const list = document.getElementById("actionList");
+  list.innerHTML = "";
+  items.forEach(text => {
+    const li = document.createElement("li");
+    li.innerHTML = `<div class="item-title">${esc(text)}</div>`;
+    list.appendChild(li);
+  });
+}
+
+function renderJunk(junk) {
+  const removed = junk.removed || [];
+  const flagged = junk.flagged || [];
+  toggle("sec-junk", removed.length > 0 || flagged.length > 0);
+  if (!removed.length && !flagged.length) return;
+
+  document.getElementById("junkDryRun").style.display = junk.dry_run ? "block" : "none";
+  document.getElementById("junkSummary").textContent =
+    `${removed.length} removed, ${flagged.length} flagged for review.`;
+
+  toggle("junkFlaggedWrap", flagged.length > 0);
+  const flaggedList = document.getElementById("junkFlaggedList");
+  flaggedList.innerHTML = "";
+  flagged.forEach(e => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="item-title"><span class="badge flagged">Review</span>${esc(e.subject)}</div>
+      <div class="item-meta">From: ${esc(e.from)} &mdash; ${esc(e.reason)}</div>
+    `;
+    flaggedList.appendChild(li);
+  });
+
+  toggle("junkRemovedWrap", removed.length > 0);
+  const removedList = document.getElementById("junkRemovedList");
+  removedList.innerHTML = "";
+  removed.forEach(e => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="item-title"><span class="badge removed">Removed</span>${esc(e.subject)}</div>
+      <div class="item-meta">From: ${esc(e.from)} &mdash; ${esc(e.reason)}</div>
+    `;
+    removedList.appendChild(li);
+  });
+}
+
+function renderErrors(errors) {
+  toggle("errorSection", errors.length > 0);
+  if (!errors.length) return;
+  document.getElementById("errorList").innerHTML =
+    errors.map(e => `<div class="error-box">${esc(e)}</div>`).join("");
+}
+
+function formatTimeRange(start, end) {
+  if (!start) return "";
+  const s = new Date(start);
+  const e = end ? new Date(end) : null;
+  if (isNaN(s)) return start;
+  const opts = { hour: "numeric", minute: "2-digit" };
+  const startStr = s.toLocaleTimeString("en-US", opts);
+  const endStr = e && !isNaN(e) ? e.toLocaleTimeString("en-US", opts) : "";
+  return endStr ? `${startStr} – ${endStr}` : startStr;
+}
+
+function formatDate(d) {
+  const dt = new Date(d);
+  return isNaN(dt) ? d : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function esc(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+</script>
+</body>
+</html>

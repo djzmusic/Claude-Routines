@@ -11,13 +11,17 @@ app = Flask(__name__)
 # Clients are initialized once at startup so OAuth only runs on first launch
 _gmail = None
 _outlook = None
+_calendar = None
+_tasks = None
 
 
 def _init_clients():
-    global _gmail, _outlook
+    global _gmail, _outlook, _calendar, _tasks
     errors = []
 
     gmail_creds = os.getenv("GMAIL_CREDENTIALS_FILE", "credentials_gmail.json")
+    google_creds = os.getenv("GOOGLE_CREDENTIALS_FILE", gmail_creds)
+
     if os.path.exists(gmail_creds):
         try:
             from gmail_client import GmailClient
@@ -39,11 +43,28 @@ def _init_clients():
     else:
         app.logger.warning("OUTLOOK_CLIENT_ID not set — Outlook skipped")
 
+    if os.path.exists(google_creds):
+        try:
+            from calendar_client import CalendarClient
+            _calendar = CalendarClient().authenticate()
+            app.logger.info("Google Calendar connected")
+        except Exception as e:
+            errors.append(f"Google Calendar: {e}")
+
+        try:
+            from tasks_client import TasksClient
+            _tasks = TasksClient().authenticate()
+            app.logger.info("Google Tasks connected")
+        except Exception as e:
+            errors.append(f"Google Tasks: {e}")
+    else:
+        app.logger.warning("Google credentials file not found — Calendar/Tasks skipped")
+
     if errors:
         for e in errors:
             app.logger.error(e)
 
-    return _gmail, _outlook
+    return _gmail, _outlook, _calendar, _tasks
 
 
 @app.route("/")
@@ -51,6 +72,37 @@ def index():
     gmail_ready = _gmail is not None
     outlook_ready = _outlook is not None
     return render_template("index.html", gmail_ready=gmail_ready, outlook_ready=outlook_ready)
+
+
+@app.route("/briefing")
+def briefing_page():
+    return render_template(
+        "briefing.html",
+        gmail_ready=_gmail is not None,
+        calendar_ready=_calendar is not None,
+        tasks_ready=_tasks is not None,
+    )
+
+
+@app.route("/api/briefing", methods=["POST"])
+def run_briefing():
+    from briefing_processor import BriefingProcessor
+
+    if not _gmail and not _calendar and not _tasks:
+        return jsonify({
+            "success": False,
+            "error": "No accounts connected. See README.md to set up Gmail and Google Calendar/Tasks.",
+        }), 400
+
+    try:
+        processor = BriefingProcessor(
+            gmail_client=_gmail, calendar_client=_calendar, tasks_client=_tasks
+        )
+        results = processor.run()
+        return jsonify({"success": True, "results": results})
+    except Exception as e:
+        app.logger.exception("Briefing failed")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/api/cleanup", methods=["POST"])
@@ -77,6 +129,8 @@ def status():
     return jsonify({
         "gmail": _gmail is not None,
         "outlook": _outlook is not None,
+        "calendar": _calendar is not None,
+        "tasks": _tasks is not None,
     })
 
 
