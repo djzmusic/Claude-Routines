@@ -53,7 +53,54 @@ Neither ManyChat nor Patreon is connected to your Zapier yet. Connect both, then
 
 ---
 
-## 4. Flow structure
+## 4A. Tip of the funnel — Master Comment Flow (replaces the 79 one-offs)
+
+Built from your real Yacht/Baker Street flow (2,541 sent, 59.8% CTR) + the Rhythm email ask (73% reply rate). Everything links to Patreon. Duplicate this one flow per post; only swap the keyword, song tag, and links.
+
+```
+TRIGGER: comment keyword on post/reel
+  → Action: add tag [song]
+  → Condition: has tag patreon_member?
+       YES → "You're a patron 🙌 here's the track: [PATREON_POST]"  → END
+       NO  ↓
+Msg 0  "Hey! Thanks for the comment 🔌
+        Tap JUST THE TRACK for the full [SONG] remix
+        or GIVE ME EVERYTHING for the full collection (30+ remixes)"
+        [Just the track]                 [Give me everything] → tag hot_lead → Msg 2
+
+Msg 1  User Input (reply type = EMAIL, save to system Email field)
+       "Where should I send the full version? Drop your email 👇"
+         on reply      → tag email_captured → send [FREE_TRACK_LINK]
+         no reply 10m  → send [FREE_TRACK_LINK] anyway (don't lose them)
+       → Msg 2
+
+Msg 2  "You made the right move 👀 The collection unlocks 30 tracks
+        and I keep adding new remixes."
+        [Grab the collection] → [PATREON_LINK]  (button click → tag clicked_offer)
+        (if no email yet: repeat the email ask here, once)
+
+SMART DELAY 23 hours   ← keeps you inside Instagram's 24h window
+  → Condition: has tag patreon_member? YES → END
+
+Msg 3  "Hope you're liking the [SONG] remixes. Rest of the collection is here.
+        **DISCOUNT CODE: [CODE]**"
+        [Yes! More please] → [PATREON_LINK] (tag clicked_offer)
+
+HANDOFF
+  → Condition: has tag email_captured?
+       YES → add tag drip_active, set drip_step = 1 → email drip (section 4B) takes over
+       NO  → END (they re-enter next time they comment on any post)
+```
+
+**Why this order:** DMs only get you 24 hours, and Instagram can't message them after that. The email ask in Msg 1 is what makes the forever drip possible. At your volume (~2,500 commenters per hit post × ~70% email reply), that's ~1,700 emails from one post.
+
+**Check before launch:**
+- Use a **User Input** block with type **Email**, not a plain "waiting for text" reply. Otherwise the address isn't validated and you can't email it.
+- ManyChat Email needs your sender domain verified (Settings → Email).
+
+---
+
+## 4B. Email drip structure (after the 24h DM window closes)
 
 Build each step as a Flow with **Smart Delays**. Before every send, put a **Condition** block:
 `Tag patreon_member does NOT exist` AND `Tag drip_paused_30d does NOT exist` → continue. Otherwise → stop.
@@ -70,7 +117,7 @@ ENTRY (any keyword / new subscriber)
       └─ EVERGREEN LOOP: every 7 days, rotate Msg E1 → E8, then repeat
 ```
 
-Each message sends by **Email always** + **DM if the 24h window is open** (ManyChat handles this if you add both channels to the step; DM fails silently outside the window).
+Days count from the handoff. Messages go by **email**. If they comment again (reopening the 24h window), the next step can also go by DM.
 
 **Buttons on every message:** `Join Patreon 🔥` → `[PATREON_LINK]` · `I already joined ✅` · `Not right now` (adds `drip_paused_30d`, auto-removed after 30 days by a Smart Delay).
 
