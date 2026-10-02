@@ -2,7 +2,23 @@
 
 **Goal:** Every ManyChat subscriber gets dripped until they become a Patreon member. The moment they join, they drop out automatically.
 
-Placeholders to swap: `[PATREON_LINK]` (use a UTM: `?utm_source=manychat&utm_campaign=drip`), `[TIER]`, `[$X]`, `[FREE_MASHUP_LINK]`.
+**Patreon link (use everywhere):** https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
+
+Still to swap by hand: `[FREE_MASHUP_LINK]`, `[FREE_TRACK_LINK]`, `[PATREON_POST]`, `[CODE]`, `[DATE]`, `[TITLE]`, and the per-message lists/quotes.
+
+### Live tiers (pulled from Patreon 2026-10-02)
+
+| Tier | Price | Patrons | What they get |
+|---|---|---|---|
+| Free | $0 | 7,444 | Follower access, public posts |
+| 4 on the FLOOR | $5/mo | 37 | 4 mashups a month, 320kbps radio quality |
+| **My Entire Mash Up Catalog** ⭐ | **$8/mo** | **457** | Full HQ streaming of the entire mashup catalog (460+), favorite TikTok mashups, full-length mixtapes (30–60 min), ad-free, 320kbps |
+| Mixtapes & Mash Ups | $12/mo | 134 | Full-length mixtapes (30–60 min), stream the full catalog, 4 new mashups a month |
+| MP3 Downloads | $20/mo | 231 | Download every mashup and mix as MP3 via a monthly Dropbox link |
+
+**Lead offer in the drip: My Entire Mash Up Catalog, $8/mo.** It's the most popular tier and the easiest yes. Mention MP3 Downloads ($20) as the upgrade for DJs who want files.
+
+*Drafted but unpublished on Patreon: STREAMING $10, DOWNLOADS $15, MERCH $20, MENTORSHIP $150. Don't reference these in copy until they're live.*
 
 ---
 
@@ -65,7 +81,7 @@ TRIGGER: comment keyword on post/reel
        NO  ↓
 Msg 0  "Hey! Thanks for the comment 🔌
         Tap JUST THE TRACK for the full [SONG] remix
-        or GIVE ME EVERYTHING for the full collection (30+ remixes)"
+        or GIVE ME EVERYTHING for the full catalog (460+ mashups)"
         [Just the track]                 [Give me everything] → tag hot_lead → Msg 2
 
 Msg 1  User Input (reply type = EMAIL, save to system Email field)
@@ -74,17 +90,17 @@ Msg 1  User Input (reply type = EMAIL, save to system Email field)
          no reply 10m  → send [FREE_TRACK_LINK] anyway (don't lose them)
        → Msg 2
 
-Msg 2  "You made the right move 👀 The collection unlocks 30 tracks
-        and I keep adding new remixes."
-        [Grab the collection] → [PATREON_LINK]  (button click → tag clicked_offer)
+Msg 2  "You made the right move 👀 $8/mo unlocks my entire catalog —
+        460+ mashups, full-length mixtapes, and I keep adding more."
+        [Grab the collection] → https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip  (button click → tag clicked_offer)
         (if no email yet: repeat the email ask here, once)
 
 SMART DELAY 23 hours   ← keeps you inside Instagram's 24h window
   → Condition: has tag patreon_member? YES → END
 
 Msg 3  "Hope you're liking the [SONG] remixes. Rest of the collection is here.
-        **DISCOUNT CODE: [CODE]**"
-        [Yes! More please] → [PATREON_LINK] (tag clicked_offer)
+        **DISCOUNT CODE: [CODE]**" (or drop the code line if you're not running one)
+        [Yes! More please] → https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip (tag clicked_offer)
 
 HANDOFF
   → Condition: has tag email_captured?
@@ -119,7 +135,7 @@ ENTRY (any keyword / new subscriber)
 
 Days count from the handoff. Messages go by **email**. If they comment again (reopening the 24h window), the next step can also go by DM.
 
-**Buttons on every message:** `Join Patreon 🔥` → `[PATREON_LINK]` · `I already joined ✅` · `Not right now` (adds `drip_paused_30d`, auto-removed after 30 days by a Smart Delay).
+**Buttons on every message:** `Join Patreon 🔥` → `https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip` · `I already joined ✅` · `Not right now` (adds `drip_paused_30d`, auto-removed after 30 days by a Smart Delay).
 
 ---
 
@@ -134,39 +150,39 @@ Days count from the handoff. Messages go by **email**. If they comment again (re
 
 ### Msg 1 — Day 1 (What Patreon is)
 > Quick one — every day I post a mashup. But the extended versions, the unreleased edits, and the ones I can't post because of copyright? Those live on my Patreon.
-> [TIER] is [$X]/mo. Less than a coffee. 👉 [PATREON_LINK]
+> "My Entire Mash Up Catalog" is $8/mo — 460+ mashups plus full-length mixtapes, ad-free in 320kbps. Less than a coffee run. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 2 — Day 3 (Behind the scenes)
 > Real talk: some of my best mashups never hit socials. Too long, too wild, or the label would take them down.
 > Patreon is where they live. Here's what's in there right now: [list 3 recent drops]
-> 👉 [PATREON_LINK]
+> 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 3 — Day 5 (Social proof)
 > "[Patron quote/screenshot]" — that's from one of my patrons this week.
-> The crew in there gets first listen on everything + requests. Come through 👉 [PATREON_LINK]
+> The crew in there gets first listen on everything + requests. Come through 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 4 — Day 7 (Request hook)
 > Got a song combo you've always wanted to hear together? Patrons get to request mashups. I actually make them.
-> Lock in your request 👉 [PATREON_LINK]
+> Lock in your request 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 5 — Day 10 (Objection: "Why pay?")
 > "Why pay when you post free stuff every day?"
-> Fair. The free stuff stays free. Patreon is for people who want MORE — full-length versions, downloads, and a say in what I make next. It also keeps me making this daily. 🙏
-> 👉 [PATREON_LINK]
+> Fair. The free stuff stays free. Patreon is for people who want MORE — $8/mo streams the entire catalog plus full-length mixtapes, and $20/mo gets you every mashup as an MP3 download for your own sets. It also keeps me making this daily. 🙏
+> 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 6 — Day 14 (Soft urgency)
 > This month's exclusive drop goes out on [DATE]. Join before then and it's yours.
-> 👉 [PATREON_LINK]
+> 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Evergreen loop (every 7 days, rotate E1–E8, repeat forever)
-- **E1 – New drop:** "Just dropped [TITLE] on Patreon. 🔥 Patrons already have it 👉 [LINK]"
-- **E2 – Monthly recap:** "Here's everything patrons got this month: [list]. 👉 [LINK]"
-- **E3 – Request spotlight:** "A patron asked for [A] x [B]. I made it. You could be next 👉 [LINK]"
+- **E1 – New drop:** "Just dropped [TITLE] on Patreon. 🔥 Patrons already have it 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
+- **E2 – Monthly recap:** "Here's everything patrons got this month: [list]. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
+- **E3 – Request spotlight:** "A patron asked for [A] x [B]. I made it. You could be next 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
 - **E4 – Behind the board:** short Ableton/CapCut clip of how a mashup gets built + "Full breakdowns on Patreon"
-- **E5 – Milestone:** "We just hit [X] patrons. Help me get to [Y] 👉 [LINK]"
-- **E6 – Price anchor:** "[$X]/mo = [N] exclusive mashups a month. That's [$cost] a track."
+- **E5 – Milestone:** "We just hit 850 paying patrons. Help me get to 1,000 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip" (update the number monthly)
+- **E6 – Price anchor:** "$8/mo = 460+ mashups and full mixtapes. That's under 2 cents a track."
 - **E7 – Personal:** "Why I started doing this daily…" (short story, soft CTA)
-- **E8 – Direct ask:** "Straight up — if you've vibed with my stuff, Patreon is the best way to support it. 👉 [LINK]"
+- **E8 – Direct ask:** "Straight up — if you've vibed with my stuff, Patreon is the best way to support it. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
 
 Refresh E1, E2, E5 monthly with real titles/numbers — 10 minutes a month.
 
