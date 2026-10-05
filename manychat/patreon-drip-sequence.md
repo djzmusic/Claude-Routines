@@ -6,19 +6,19 @@
 
 Still to swap by hand: `[FREE_MASHUP_LINK]`, `[FREE_TRACK_LINK]`, `[PATREON_POST]`, `[CODE]`, `[DATE]`, `[TITLE]`, and the per-message lists/quotes.
 
-### Live tiers (pulled from Patreon 2026-10-02)
+### Membership model (effective October 2026)
 
-| Tier | Price | Patrons | What they get |
-|---|---|---|---|
-| Free | $0 | 7,444 | Follower access, public posts |
-| 4 on the FLOOR | $5/mo | 37 | 4 mashups a month, 320kbps radio quality |
-| **My Entire Mash Up Catalog** ⭐ | **$8/mo** | **457** | Full HQ streaming of the entire mashup catalog (460+), favorite TikTok mashups, full-length mixtapes (30–60 min), ad-free, 320kbps |
-| Mixtapes & Mash Ups | $12/mo | 134 | Full-length mixtapes (30–60 min), stream the full catalog, 4 new mashups a month |
-| MP3 Downloads | $20/mo | 231 | Download every mashup and mix as MP3 via a monthly Dropbox link |
+| Tier | Price | What they get |
+|---|---|---|
+| Free | $0 | Follower access, public posts |
+| **STREAMING** ⭐ | **$10/mo** | Ad-free; stream 460+ mashups, blends, remixes & Yacht Rock edits; full-length mixtapes (30–60 min) |
+| DOWNLOADS | $15/mo | Everything in Streaming + download all mixes & mashups via monthly Dropbox link |
+| MERCH | $20/mo | Everything in Downloads + exclusive merch (monthly item, seasonal drop, or annual package) |
+| MENTORSHIP | $150/mo | Monthly live Zoom for DJs/producers/entertainment business owners, private group chat, weekly Q&A, early access to techniques and setups |
 
-**Lead offer in the drip: My Entire Mash Up Catalog, $8/mo.** It's the most popular tier and the easiest yes. Mention MP3 Downloads ($20) as the upgrade for DJs who want files.
+**Lead offer in the drip: STREAMING, $10/mo.** Mention DOWNLOADS ($15) as the upgrade for DJs who want files. Keep MENTORSHIP out of fan-facing drip copy; pitch it separately to DJs and business owners.
 
-*Drafted but unpublished on Patreon: STREAMING $10, DOWNLOADS $15, MERCH $20, MENTORSHIP $150. Don't reference these in copy until they're live.*
+*Legacy tiers (4 on the FLOOR $5, My Entire Mash Up Catalog $8, Mixtapes & Mash Ups $12, MP3 Downloads $20) are unpublished, not deleted, so existing patrons stay grandfathered. Never quote legacy prices in new copy.*
 
 ---
 
@@ -90,7 +90,7 @@ Msg 1  User Input (reply type = EMAIL, save to system Email field)
          no reply 10m  → send [FREE_TRACK_LINK] anyway (don't lose them)
        → Msg 2
 
-Msg 2  "You made the right move 👀 $8/mo unlocks my entire catalog —
+Msg 2  "You made the right move 👀 $10/mo unlocks my entire catalog —
         460+ mashups, full-length mixtapes, and I keep adding more."
         [Grab the collection] → https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip  (button click → tag clicked_offer)
         (if no email yet: repeat the email ask here, once)
@@ -150,7 +150,7 @@ Days count from the handoff. Messages go by **email**. If they comment again (re
 
 ### Msg 1 — Day 1 (What Patreon is)
 > Quick one — every day I post a mashup. But the extended versions, the unreleased edits, and the ones I can't post because of copyright? Those live on my Patreon.
-> "My Entire Mash Up Catalog" is $8/mo — 460+ mashups plus full-length mixtapes, ad-free in 320kbps. Less than a coffee run. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
+> Streaming is $10/mo: 460+ mashups plus full-length mixtapes, ad-free in 320kbps. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 2 — Day 3 (Behind the scenes)
 > Real talk: some of my best mashups never hit socials. Too long, too wild, or the label would take them down.
@@ -167,7 +167,7 @@ Days count from the handoff. Messages go by **email**. If they comment again (re
 
 ### Msg 5 — Day 10 (Objection: "Why pay?")
 > "Why pay when you post free stuff every day?"
-> Fair. The free stuff stays free. Patreon is for people who want MORE — $8/mo streams the entire catalog plus full-length mixtapes, and $20/mo gets you every mashup as an MP3 download for your own sets. It also keeps me making this daily. 🙏
+> Fair. The free stuff stays free. Patreon is for people who want MORE — $10/mo streams the entire catalog plus full-length mixtapes, and $15/mo gets you every mashup as a download for your own sets. It also keeps me making this daily. 🙏
 > 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip
 
 ### Msg 6 — Day 14 (Soft urgency)
@@ -180,7 +180,7 @@ Days count from the handoff. Messages go by **email**. If they comment again (re
 - **E3 – Request spotlight:** "A patron asked for [A] x [B]. I made it. You could be next 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
 - **E4 – Behind the board:** short Ableton/CapCut clip of how a mashup gets built + "Full breakdowns on Patreon"
 - **E5 – Milestone:** "We just hit 850 paying patrons. Help me get to 1,000 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip" (update the number monthly)
-- **E6 – Price anchor:** "$8/mo = 460+ mashups and full mixtapes. That's under 2 cents a track."
+- **E6 – Price anchor:** "$10/mo = 460+ mashups and full mixtapes. About 2 cents a track."
 - **E7 – Personal:** "Why I started doing this daily…" (short story, soft CTA)
 - **E8 – Direct ask:** "Straight up — if you've vibed with my stuff, Patreon is the best way to support it. 👉 https://www.patreon.com/mrwiredup?utm_source=manychat&utm_campaign=drip"
 
